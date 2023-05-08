@@ -6,7 +6,7 @@ const router = require('./routes/main')
 const fileUpload = require('express-fileupload')
 const path = require('path')
 const TelegramBot = require('node-telegram-bot-api')
-const token = '5917550299:AAEXpVROrb2boEMjwnA51QKb5nwM8VxvIZ8'
+const token = process.env.token
 
 const bot = new TelegramBot(token, {polling: true});
 const app = express()
