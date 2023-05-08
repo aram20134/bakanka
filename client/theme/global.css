@@ -1,0 +1,69 @@
+
+
+a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+body {
+  background-color: aliceblue !important;
+}
+
+.react-tel-input {
+  width: 100%;
+}
+.special-label {
+  background-color: #F8FDFF !important;
+  color: #65748B;
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.4375em;
+    font-family: "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+}
+
+.image-marker__marker {
+  transform: translate(-50%, -50%);
+}
+
+.lg-react-element  {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+@media screen and (min-width: 1200px) {
+  .react-tel-input {
+    width: auto !important;
+  }
+}
+@media screen and (max-width: 1200px) {
+  .image-marker__marker {
+    scale: 0.7;
+    transform: translate(-70%, -70%);
+  }
+}
+@media screen and (max-width: 850px) {
+  .image-marker__marker {
+    scale: 0.5;
+    transform: translate(-100%, -100%);
+  }
+}
+@media screen and (max-width: 620px) {
+  .image-marker__marker {
+    scale: 0.3;
+    transform: translate(-170%, -170%);
+  }
+  .lg-react-element  {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+}
+
+
+/* 
+.image-marker__image {
+  pointer-events: none;
+} */
