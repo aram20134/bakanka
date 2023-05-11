@@ -14,7 +14,7 @@ const OrderPhone = () => {
     if (name.trim().length && phone.length > 5) {
       setOpenAlert(false)
       setOpenSuccess(true)
-      orderPhoneApi({name, phone, comm}).then(() => console.log(res))
+      orderPhoneApi({name, phone, comm}).then((res) => console.log(res))
       setPhone('+7')
       setName('')
       setComm('')

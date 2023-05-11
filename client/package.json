@@ -31,7 +31,8 @@
     "react-imask": "^6.6.0",
     "react-number-format": "^5.1.4",
     "react-phone-input-2": "^2.15.1",
-    "swiper": "^9.2.3"
+    "swiper": "^9.2.3",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "eslint": "8.38.0",

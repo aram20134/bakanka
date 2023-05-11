@@ -19,9 +19,12 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import CollectionsIcon from '@mui/icons-material/Collections';
 import { Modal } from '@mui/material';
 import { useState } from 'react';
-import OrderPhone from './UI/OrderPhone';
 import ContactsIcon from '@mui/icons-material/Contacts';
 import 'react-phone-input-2/lib/material.css'
+import OrderPhone from './UI/OrderPhone';
+
+import logo from '../public/favicon.png'
+import Image from 'next/image';
 
 const pages = [{name: 'Прайс-лист', icon: <ListAltIcon  />, href:'/price-list'}, {name: 'О нас', icon: <InfoIcon />, href:'/about'}, {name: 'Контакты', icon: <ContactsIcon />, href:'/contacts'}, {name: 'Галерея', icon: <CollectionsIcon />, href:'/gallery'}];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
@@ -77,9 +80,9 @@ function ResponsiveAppBar() {
       <Container maxWidth="lg">
         <Toolbar disableGutters>
           <Link href={'/'}>
-            <Stack direction={'row'} alignItems={'center'}>
-              <CottageIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
-              <Typography variant="h5" noWrap sx={{ mr: 2, display: { xs: 'none', md: 'flex' }, fontWeight: 700, letterSpacing: '.1rem', color: 'inherit', textDecoration: 'none',}}>
+            <Stack gap={2} direction={'row'} alignItems={'center'} sx={{display: { xs: 'none', md: 'flex' }}}>
+              <Image src={logo} width={50} height={50} />
+              <Typography variant="h5" noWrap sx={{ mr: 2, fontWeight: 700, letterSpacing: '.1rem', color: 'inherit', textDecoration: 'none',}}>
                 Баканское озеро
               </Typography>
             </Stack>
@@ -103,9 +106,9 @@ function ResponsiveAppBar() {
           
           <Box sx={{flexGrow:1, flexDirection:'row'}}>
             <Link href={'/'}>
-              <Stack direction={'row'} alignItems={'center'}>
-                <CottageIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-                <Typography variant="h5" textAlign={'center'} sx={{ mr: 2, display: { xs: 'flex', md: 'none' }, fontWeight: 700, letterSpacing: '.1rem', color: 'inherit', textDecoration: 'none',}}>
+              <Stack sx={{display: { xs: 'flex', md: 'none' }}} direction={'row'} alignItems={'center'} gap={2}>
+                <Image src={logo} width={40} height={40} />
+                <Typography variant={'h6'} textAlign={'center'} sx={{ mr: 2, fontWeight: 700, letterSpacing: '.1rem', color: 'inherit', textDecoration: 'none'}}>
                   Баканское озеро
                 </Typography>
               </Stack>

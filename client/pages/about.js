@@ -213,7 +213,7 @@ export const About = () => {
                 <Grid item xs sm={3}>
                   <Typography variant='h5'>Рейтинг клиентов</Typography>
                   <Rating readOnly size='large' precision={0.25} value={stars.sum / stars.elements} />
-                  <Typography variant='h5'><b style={{fontSize:40}}>{(stars.sum / stars.elements).toFixed(1) || 0}</b> / 5</Typography>
+                  <Typography variant='h5'><b style={{fontSize:40}}>{((stars.sum / stars.elements) || 0).toFixed(1)}</b> / 5</Typography>
                   <Typography color={'text.disabled'} variant='caption'>На основе {reviews.length} отзывов</Typography>
                 </Grid>
                 <Grid item xs md={4} width={'100%'}>

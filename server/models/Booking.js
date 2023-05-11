@@ -7,7 +7,7 @@ const Booking = new Schema({
   email: { type: String },
   phoneNumber: { type: String },
   totalPrice: { type: Number },
-  isActive: { type: Boolean },
+  isActive: { type: Boolean, default: false },
   description: { type: String }
 })
 

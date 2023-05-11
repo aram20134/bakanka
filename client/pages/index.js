@@ -53,7 +53,7 @@ export default function Home() {
       <Card sx={{p:5, mt: -8, backgroundColor:'rgba(255, 255, 255, 0.7)', backdropFilter: 'saturate(200%) blur(30px)', mx: {xs: 2, lg: 3}, flexDirection:'row', display:'flex'}}>
         <Grid container item xs={12} lg={9} sx={{mx:'auto'}}>
           <Grid item xs={12} md={4}>
-            <CounterCard suffix="+" count={6} title={'Лет работы'} description={'Гарантия безупречного сервиса, уютного проживания и незабываемых впечатлений в нашей базе отдыха'} />
+            <CounterCard suffix="+" count={4} title={'Лет работы'} description={'Гарантия безупречного сервиса, уютного проживания и незабываемых впечатлений в нашей базе отдыха'} />
           </Grid>
           <Grid item xs={12} md={4} display={'flex'}>
             <Divider orientation='vertical' sx={{display: {xs: 'none', md: 'block'}, mx: 0}} />
@@ -65,7 +65,7 @@ export default function Home() {
           </Grid>
         </Grid>
       </Card>
-      <Card sx={{p:5, mt: 2, backgroundColor:'rgba(255, 255, 255, 0.7)', backdropFilter: 'saturate(200%) blur(30px)', mx: {xs: 2, lg: 3}, flexDirection:'row', display:'flex'}}>
+      {/* <Card sx={{p:5, mt: 2, backgroundColor:'rgba(255, 255, 255, 0.7)', backdropFilter: 'saturate(200%) blur(30px)', mx: {xs: 2, lg: 3}, flexDirection:'row', display:'flex'}}>
         <Swiper
           spaceBetween={30}
           autoplay={{
@@ -88,7 +88,7 @@ export default function Home() {
             <Image alt='' src={bgImage} style={{height:'350px', objectFit:'cover', width:'100%'}} />
           </SwiperSlide>
         </Swiper>
-      </Card>
+      </Card> */}
       <Card sx={{p:0, mt: 2, backgroundColor:'rgba(255, 255, 255, 0.7)', backdropFilter: 'saturate(200%) blur(30px)', mx: {xs: 2, lg: 3}, flexDirection:'row'}}>
         <Information />
       </Card>

@@ -8,7 +8,7 @@ class BookingController {
       const order = new Booking({...req.body})
       console.log(order)
       order.save()
-      res.send({status:'OK'})
+      res.send(order)
     } catch (e) {
       console.log(e)
       return res.status(500).send(e)
@@ -17,7 +17,7 @@ class BookingController {
   async getOrders (req, res) {
     try {
       const { day, type } = req.body
-      const orders = await Booking.find({day, type})
+      const orders = await Booking.find({day, type, isActive: true})
       res.send(orders)
     } catch (e) {
       console.log(e)

@@ -1,4 +1,6 @@
+import axios from "axios";
 import { authHost, host } from ".";
+import { v4 as uuidv4 } from 'uuid';
 
 export const addOrder = async (props) => {
   const {data} = await host.post('/', {...props})
@@ -78,5 +80,34 @@ export const changeImage = async ({id, title, description}) => {
 
 export const orderPhoneApi = async ({phone, name, comm}) => {
   const {data} = await host.post('/orderPhone', {phone, name, comm})
+  return data
+}
+
+export const getPriceYandex = async ({value, description}) => {
+  let body = JSON.stringify({
+    "amount": {
+      "value": `"${value}"`,
+      "currency": "RUB"
+    },
+    "confirmation": {
+      "type": "embedded"
+    },
+    "capture": true,
+    "description": `"${description}"`
+  });
+  const key = uuidv4()
+  let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: 'https://api.yookassa.ru/v3/payments',
+    headers: { 
+      'Idempotence-Key': key, 
+      'Content-Type': 'application/json', 
+      'Authorization': 'Basic MzE3NjA4OnRlc3RfRFRkWVBJMUxsSUVFa1dFUjhyUVVpZ2JvSDdNczYwR001MGlUTUpzX2ZHUQ=='
+    },
+    data: body
+  };
+
+  const {data} = await axios.request(config)
   return data
 }
