@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import Layout from '../components/Layout'
 
 import Box from '@mui/material/Box'
@@ -39,7 +39,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
 import bgMap from '../assets/bgMap3.png'
-import { addOrder, getOrders } from '../api/ordersAPI'
+import { addOrder, getOrders, getPriceYandex } from '../api/ordersAPI'
 import Chip from '@mui/material/Chip'
 
 import Avatar from '@mui/material/Avatar';
@@ -63,6 +63,7 @@ const BookingSteps = ({isAdmin}) => {
   const router = useRouter()
   const [type, setType] = useState('')
   const [activeStep, setActiveStep] = useState(0)
+  const [orderId, setOrderId] = useState(null)
   const [chosedDate, setChosedDate] = useState(null)
   const [chosedBooking, setChosedBooking] = useState([])
   const [orderedBooking, setOrderedBooking] = useState([])
@@ -78,13 +79,38 @@ const BookingSteps = ({isAdmin}) => {
   }, [chosedBooking])
   
   useEffect(() => {
-    if (activeStep === steps.length) {
+  
+    if (activeStep === 3) {
       const fullPrice = chosedBooking.reduce((acc, cur) => {
         acc += cur.price
         return acc
       }, 0)
       addOrder({day: chosedDate, title: chosedBooking, type: type.key, email:'dasigty@gmail.com', phoneNumber: '+79042292492', totalPrice: fullPrice})
-      .then((data) => console.log(data))
+      .then((data) => setOrderId(data._id))
+    }
+    if (activeStep === 2) {
+      const fullPrice = chosedBooking.reduce((acc, cur) => {
+        acc += cur.price
+        return acc
+      }, 0)
+
+      getPriceYandex({value: fullPrice, description: 'Бронирование беседок'}).then((payment) => {
+        const checkout = new window.YooMoneyCheckoutWidget({
+          confirmation_token: payment.confirmation.confirmation_token, //Токен, который перед проведением оплаты нужно получить от ЮKassa
+          return_url: `http://localhost:3000/booking?type=kiosk&order=${payment.id}`, //Ссылка на страницу завершения оплаты
+          error_callback: function(error) {
+              //Обработка ошибок инициализации
+              console.log(error)
+          }
+        });
+  
+        checkout.render('payment-form')
+        //Метод возвращает Promise, исполнение которого говорит о полной загрузке платежной формы (можно не использовать).
+          .then(() => {
+            //Код, который нужно выполнить после отображения платежной формы.
+          });
+      })
+      
     }
   }, [activeStep])
   
@@ -121,8 +147,6 @@ const BookingSteps = ({isAdmin}) => {
   const goNext = () => {
     setActiveStep(prev => prev === steps.length ? prev : prev + 1)
   }
-
-  
 
   const CustomMarker = ({label, itemNumber, price, typePrice}) => {
     const isChosed = chosedBooking.filter((val) => val.title === label).length > 0 ? true : false
@@ -166,6 +190,7 @@ const BookingSteps = ({isAdmin}) => {
   }
 
   const drawStepContent = (i) => {
+
     switch (i) {
       case 0:
         return (
@@ -200,9 +225,10 @@ const BookingSteps = ({isAdmin}) => {
           acc += cur.price
           return acc
         }, 0)
-
+        
         return (
           <Box p={2} display={'flex'} flexDirection={'column'} gap={2} alignItems={'flex-start'}>
+            <div id="payment-form"></div>
             <Typography variant='h5'>Итог</Typography>
             <List sx={{maxWidth:'lg'}}>
               <ListItem disableGutters>
@@ -254,7 +280,8 @@ const BookingSteps = ({isAdmin}) => {
     }
   }
 
-  const drawStepButtons = (i) => {
+  const DrawStepButtons = ({i}) => {
+
     switch (i) {
       case 0:
         return (
@@ -313,7 +340,7 @@ const BookingSteps = ({isAdmin}) => {
             </Stepper>
             {drawStepContent(activeStep)}
             <Box mt={2} display={'flex'} justifyContent={'space-between'}>
-              {drawStepButtons(activeStep)}
+              <DrawStepButtons i={activeStep} />
             </Box>
           </Card>
         </Box>
