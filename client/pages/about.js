@@ -111,7 +111,7 @@ export const About = () => {
   
 
   return (
-    <Layout title={'О нас'}>
+    <Layout title={'О нас'} description={'О нас баканское озеро'}>
       <Snackbar open={openSnack} autoHideDuration={3000} onClose={handleCloseSnack}>
         <Alert onClose={handleCloseSnack} severity="success" sx={{ width: '100%' }}>
           Отзыв успешно отправлен!
@@ -123,7 +123,7 @@ export const About = () => {
           <Card sx={{p: 2}}>
             <Grid gap={3} container>
               <Grid item xs={12} sm={6}>
-                <Image style={{objectFit:'cover', width:'100%', height:'100%'}} src={test} />
+                <Image alt='Баканское озеро' style={{objectFit:'cover', width:'100%', height:'100%'}} src={test} />
               </Grid>
               <Grid item xs>
                 <Typography mb={2} variant='h5' textAlign={'center'}>История создания нашего озера</Typography>
@@ -260,7 +260,7 @@ export const About = () => {
           
           {reviews.slice(0, spliceState).map((review) => {
             return (
-              <Review review={review} />
+              <Review key={review._id} review={review} />
             )
           })}
           <Box mt={2} textAlign={'center'}>

@@ -1,5 +1,6 @@
 import { createTheme } from '@mui/material';
 import { ruRU  } from '@mui/material/locale';
+import { DataGrid, ruRU as RuDataGridX } from '@mui/x-data-grid';
 
 export const theme = createTheme({
   breakpoints: {
@@ -177,4 +178,4 @@ export const theme = createTheme({
       lineHeight: 1.375
     },
   }
-}, ruRU);
+}, ruRU, RuDataGridX);

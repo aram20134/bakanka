@@ -47,7 +47,7 @@ function Footer({ company, links, socials, light }) {
         </Grid>
         <Grid item xs={12} lg={8} sx={{ textAlign: "center" }}>
           <Typography variant="body2" color={light ? "white" : "primary"}>
-            Все права защищены &copy; {year} ООО "ГРОМ"{" "} ОГРН: 1022304063044
+            Все права защищены &copy; {year} ООО &quot;ГРОМ&quot; ОГРН: 1022304063044
           </Typography>
           <Typography sx={{textDecoration:'underline'}} variant="body2" color={light ? "white" : "primary"}>
             <Link target='_blank' href={`${process.env.NEXT_PUBLIC_STATIC_URL}/oferta.pdf`}>Оферта</Link>

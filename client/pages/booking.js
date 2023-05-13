@@ -1,13 +1,24 @@
 import React from 'react'
 import Layout from '../components/Layout'
 import BookingSteps from '../components/BookingSteps'
+import { getPriceList } from '../api/ordersAPI'
 
-const Booking = () => {
+const Booking = ({priceList}) => {
   return (
-    <Layout title={`Бронирование`}>
-      <BookingSteps />
+    <Layout title={`Бронирование`} description={'Бронирование баканское озеро'}>
+      <BookingSteps priceList={priceList} />
     </Layout>
   )
 }
 
-export default Booking
+export default Booking 
+
+export async function getStaticProps() {
+  const priceList = await getPriceList()
+
+  return {
+    props: {
+      priceList
+    },
+  };
+}

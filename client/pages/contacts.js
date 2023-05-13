@@ -5,7 +5,7 @@ import Box from '@mui/material/Box'
 
 const Contact = () => {
   return (
-    <Layout title={'О нас'}>
+    <Layout title={'Контакты'} description={'Контакты баканское озеро'}>
       <Box m={'8rem auto'} maxWidth={'lg'}>
         <Contacts />
       </Box>

@@ -39,7 +39,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
 import bgMap from '../assets/bgMap3.png'
-import { addOrder, getOrders, getPriceYandex } from '../api/ordersAPI'
+import { acceptOrder, addOrder, getOrders, getPriceYandex, verifyToken } from '../api/ordersAPI'
 import Chip from '@mui/material/Chip'
 
 import Avatar from '@mui/material/Avatar';
@@ -50,69 +50,73 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Paper from '@mui/material/Paper'
 import Badge from '@mui/material/Badge'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { Alert } from '@mui/material'
+import { Alert, Stack } from '@mui/material'
+import PhoneInput from 'react-phone-input-2'
+import { getCookie, setCookie } from 'cookies-next'
+import Link from 'next/link'
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const types = [{key: 'kiosk', name:['Беседка', 'Беседки']}]
 const steps = ['Выберите дату посещения', 'Выберите беседку', 'Оплата']
-const allTypesKiosk = [{title: 'Беседка №1', price: 1500, typePrice: 'руб/день'}, {title: 'Беседка №2', price:1500, typePrice: 'руб/день'}, {title: 'Беседка №3', price:1500, typePrice: 'руб/день'}, {title: 'Большая беседка', price:2500, typePrice: 'руб/день'}]
 
-const BookingSteps = ({isAdmin}) => {
+const BookingSteps = ({priceList}) => {
   const router = useRouter()
   const [type, setType] = useState('')
+  const [isAdmin, setIsAdmin] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
-  const [orderId, setOrderId] = useState(null)
   const [chosedDate, setChosedDate] = useState(null)
   const [chosedBooking, setChosedBooking] = useState([])
   const [orderedBooking, setOrderedBooking] = useState([])
-  const [markers, setMarkers] = useState([{top: 47.564921596283085, left: 58.13356164383562, itemNumber: 0, label:'Беседка №1', disabled: false, price:1500, typePrice: 'руб/день'}, {top: 31.42288226997428, left: 56.93493150684932, itemNumber: 1, label: 'Беседка №2', price:1500, typePrice: 'руб/день'}, {top: 25.26341989546171, left: 37.071917808219176, itemNumber: 2, label:'Беседка №3', price:1500, typePrice: 'руб/день'}, {top: 50.21986227495229, left: 36.215753424657535, itemNumber: 3, label:'Большая беседка', price:2500, typePrice: 'руб/день'}])
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [markers, setMarkers] = useState([{top: 47.564921596283085, left: 58.13356164383562, title:'Беседка №1', type: 'Малая'}, {top: 31.42288226997428, left: 56.93493150684932, title: 'Беседка №2', type: 'Малая'}, {top: 25.26341989546171, left: 37.071917808219176, title:'Беседка №3', type: 'Малая'}, {top: 50.21986227495229, left: 36.215753424657535, title:'Большая беседка', type: 'Большая'}])
   // const [loaded, setLoaded] = useState(false)
+
+  
 
   useEffect(() => {
     setChosedBooking([])
   }, [chosedDate])
 
   useEffect(() => {
-    console.log(chosedBooking)
-  }, [chosedBooking])
+    if (router.query.mode === 'admin') {
+      verifyToken(getCookie('token')).then((tk) => {
+        setIsAdmin(true)
+        setCookie('token', tk)
+      }).catch(() => setIsAdmin(false))
+    }
+  }, [router])
+
+  useEffect(() => {
+    console.log(isAdmin)
+  }, [isAdmin])
+  
   
   useEffect(() => {
-  
-    if (activeStep === 3) {
+    if (activeStep === 2 && !isAdmin) {
+      console.log(router.query.mode)
       const fullPrice = chosedBooking.reduce((acc, cur) => {
-        acc += cur.price
+        acc += Number(cur.price)
         return acc
       }, 0)
-      addOrder({day: chosedDate, title: chosedBooking, type: type.key, email:'dasigty@gmail.com', phoneNumber: '+79042292492', totalPrice: fullPrice})
-      .then((data) => setOrderId(data._id))
-    }
-    if (activeStep === 2) {
-      const fullPrice = chosedBooking.reduce((acc, cur) => {
-        acc += cur.price
-        return acc
-      }, 0)
-
-      getPriceYandex({value: fullPrice, description: 'Бронирование беседок'}).then((payment) => {
-        const checkout = new window.YooMoneyCheckoutWidget({
-          confirmation_token: payment.confirmation.confirmation_token, //Токен, который перед проведением оплаты нужно получить от ЮKassa
-          return_url: `http://localhost:3000/booking?type=kiosk&order=${payment.id}`, //Ссылка на страницу завершения оплаты
-          error_callback: function(error) {
-              //Обработка ошибок инициализации
-              console.log(error)
-          }
-        });
-  
-        checkout.render('payment-form')
-        //Метод возвращает Promise, исполнение которого говорит о полной загрузке платежной формы (можно не использовать).
-          .then(() => {
-            //Код, который нужно выполнить после отображения платежной формы.
+      var checkout
+      addOrder({day: chosedDate, title: chosedBooking, type: type.key, name, phoneNumber: phone, totalPrice: fullPrice}).then((order) => {
+        getPriceYandex({value: fullPrice, description: 'Бронирование беседок', metadata: {orderId: order._id}}).then((payment) => {
+          checkout = new window.YooMoneyCheckoutWidget({
+            confirmation_token: payment.confirmation.confirmation_token, //Токен, который перед проведением оплаты нужно получить от ЮKassa
+            return_url: `${process.env.NEXT_PUBLIC_WEBSITE_URL}/order?type=${type.key}&payment=${payment.id}&order=${order._id}`, //Ссылка на страницу завершения оплаты
+            error_callback: function(error) {
+                //Обработка ошибок инициализации
+                console.log(error)
+            }
           });
+          checkout.render('payment-form')
+        })
       })
-      
     }
-  }, [activeStep])
+  }, [activeStep, order])
   
   useEffect(() => {
     if (chosedDate) {
@@ -135,6 +139,17 @@ const BookingSteps = ({isAdmin}) => {
   useEffect(() => {
     setType(types.filter((type) => type.key === router.query.type)[0])
   }, [router])
+
+  useEffect(() => {
+    if (type && priceList) {
+      // .filter((price) => price.rows.name === prev.type)
+      const typeList = priceList.filter((list) => list.type === type.key)[0]
+
+      setMarkers(prev => prev.map((marker) => ({...marker, ...typeList.rows.filter((row) => row.name === marker.type)[0]})))
+      console.log(type)
+    }
+  }, [type, priceList])
+  
   
   const goToLowerCase = (string) => {
     return string.slice(0, 1).toLowerCase() + string.slice(1) 
@@ -148,14 +163,19 @@ const BookingSteps = ({isAdmin}) => {
     setActiveStep(prev => prev === steps.length ? prev : prev + 1)
   }
 
-  const CustomMarker = ({label, itemNumber, price, typePrice}) => {
-    const isChosed = chosedBooking.filter((val) => val.title === label).length > 0 ? true : false
-    const ordered = orderedBooking.filter((val) => val.title === label).length > 0 ? true : false
+  useEffect(() => {
+    console.log(markers)
+  }, [markers])
+  
+
+  const CustomMarker = ({title, price, typePrice}) => {
+    const isChosed = chosedBooking.filter((val) => val.title === title).length > 0 ? true : false
+    const ordered = orderedBooking.filter((val) => val.title === title).length > 0 ? true : false
     console.log(typePrice)
     if (ordered) {
       return (
         <Box  display={'flex'} flexDirection={'column'} gap={0} alignItems={'center'}>
-          <Typography sx={{textShadow:'0 0 15px #000000'}} color={'error.light'} variant='h5'>{label}</Typography>
+          <Typography sx={{textShadow:'0 0 15px #000000'}} color={'error.light'} variant='h5'>{title}</Typography>
           <IconButton size='large'>
             <DeckIcon sx={{fontSize:60}} color='error' />
           </IconButton>
@@ -167,24 +187,24 @@ const BookingSteps = ({isAdmin}) => {
     return !isChosed ? (
       // sx={{transform:{xs: `translate(-100%, -100%)`, sm: `translate(-50%, -50%)`}, scale:{xs: '0.5', sm: '1'}}}
       <Box  display={'flex'} flexDirection={'column'} gap={0} alignItems={'center'}>
-        <Typography sx={{textShadow:'0 0 15px #000000'}} color={'primary.light'} variant='h5'>{label}</Typography>
+        <Typography sx={{textShadow:'0 0 15px #000000'}} color={'primary.light'} variant='h5'>{title}</Typography>
         <IconButton size='large'>
           <Badge color='secondary' badgeContent={price + ' Р' } max={9999}>
             <DeckIcon sx={{fontSize:60}} color='info' />
           </Badge>
         </IconButton>
-        <Button onClick={() => setChosedBooking(prev => [...prev, {title:label, price, typePrice}])} variant='contained'>Выбрать</Button>
+        <Button onClick={() => setChosedBooking(prev => [...prev, {title, price, typePrice}])} variant='contained'>Выбрать</Button>
       </Box>
     ) : (
       // sx={{transform:{xs: `translate(-100%, -100%)`, sm: `translate(-50%, -50%)`}, scale:{xs: '0.5', sm: '1'}}} 
       <Box display={'flex'} flexDirection={'column'} gap={0} alignItems={'center'}>
-        <Typography sx={{textShadow:'0 0 15px #000000'}} color={'success.light'} variant='h5'>{label}</Typography>
+        <Typography sx={{textShadow:'0 0 15px #000000'}} color={'success.light'} variant='h5'>{title}</Typography>
         <IconButton size='large'>
           <Badge color='secondary' badgeContent={price + ' Р'} max={9999}>
             <DeckIcon sx={{fontSize:60}} color='success' />
           </Badge>
         </IconButton>
-        <Button color='success' onClick={() => setChosedBooking(prev => prev.filter((val) => val.title !== label))} variant='contained'>Отменить</Button>
+        <Button color='success' onClick={() => setChosedBooking(prev => prev.filter((val) => val.title !== title))} variant='contained'>Отменить</Button>
       </Box>
     )
   }
@@ -197,8 +217,11 @@ const BookingSteps = ({isAdmin}) => {
           <Box p={0} flexDirection={'column'} display={'flex'} alignItems={'center'} justifyContent={'center'} sx={{width:'100%'}}>
             <LocalizationProvider adapterLocale={ru} dateAdapter={AdapterDateFns}>
               <DateCalendar disablePast value={chosedDate} onChange={(date) => setChosedDate(date)} />
-              <Typography>Выбранная дата:</Typography>
-              <DateField disablePast value={chosedDate} onChange={(date) => setChosedDate(date)}  />
+              <Stack mt={1} gap={1}>
+                <DateField label='Дата' disablePast value={chosedDate} onChange={(date) => setChosedDate(date)}  />
+                <TextField onChange={(e) => setName(e.target.value)} label='Имя' />
+                <PhoneInput value={phone} onChange={(e) => setPhone(e)} specialLabel='Телефон' inputStyle={{background:'transparent', height:'60px', width:'100%'}} countryCodeEditable={false} country={'ru'}  />
+              </Stack>
             </LocalizationProvider>
           </Box>
         )
@@ -206,7 +229,7 @@ const BookingSteps = ({isAdmin}) => {
         return (
           <Box p={2}>
             <ImageMarker markerComponent={CustomMarker} alt='map' markers={markers} src={bgMap.src} />
-            <Autocomplete isOptionEqualToValue={(opt, value) => opt.title === value.title} value={chosedBooking} onChange={(e, newValue) => setChosedBooking(newValue)} sx={{mt:2}} multiple options={allTypesKiosk.filter((val) => !orderedBooking.find((ordered) => val.title === ordered.title))} getOptionLabel={(opt) => opt.title} 
+            <Autocomplete isOptionEqualToValue={(opt, value) => opt.title === value.title} value={chosedBooking} onChange={(e, newValue) => setChosedBooking(newValue)} sx={{mt:2}} multiple options={markers.filter((val) => !orderedBooking.find((ordered) => val.label === ordered.title))} getOptionLabel={(opt) => opt.title} 
               renderOption={(props, option, {selected}) => (
                 <li {...props}>
                   <Checkbox icon={icon} checkedIcon={checkedIcon} checked={selected} />
@@ -222,13 +245,12 @@ const BookingSteps = ({isAdmin}) => {
       case 2:
         const label = chosedBooking.map((val) => val.title).join(', ')
         const fullPrice = chosedBooking.reduce((acc, cur) => {
-          acc += cur.price
+          acc += Number(cur.price)
           return acc
         }, 0)
         
         return (
           <Box p={2} display={'flex'} flexDirection={'column'} gap={2} alignItems={'flex-start'}>
-            <div id="payment-form"></div>
             <Typography variant='h5'>Итог</Typography>
             <List sx={{maxWidth:'lg'}}>
               <ListItem disableGutters>
@@ -267,12 +289,24 @@ const BookingSteps = ({isAdmin}) => {
                 </TableBody>
               </Table>
             </TableContainer>
+            {isAdmin ? (
+              <>
+                <Typography alignSelf={'center'} color={'info.main'} variant='h5'>Нажмите на кнопку для брони</Typography>
+                <Button onClick={() => addOrder({day: chosedDate, title: chosedBooking, type: type.key, name, phoneNumber: phone, totalPrice: fullPrice}).then((order) => {setActiveStep(3), acceptOrder(order._id)})} sx={{alignSelf:'center'}} variant='contained' color='success'>Забронировать</Button>
+              </>
+            ) : (
+              <>
+                <Typography alignSelf={'center'} color={'info.main'} variant='h5'>Выберите способ оплаты</Typography>
+                <div style={{alignSelf:'center'}} id="payment-form"></div>
+              </>
+            )}
           </Box>
         )
       case 3: 
         return (
-          <Box p={2}>
+          <Box p={2} display={'flex'} flexDirection={'column'} gap={'15px'}>
             <Alert severity='success'>Успешно забронировано</Alert>
+            <Button component={Link} href='/admin?page=orders' variant='contained' color='primary'>Вернуться в админ панель</Button>
           </Box>
         )
       default:
@@ -287,7 +321,7 @@ const BookingSteps = ({isAdmin}) => {
         return (
           <>
             <Button disabled sx={{fontSize:'1rem'}} onClick={goBack}>Назад</Button>
-            <Button disabled={!chosedDate && true} sx={{fontSize:'1rem'}} onClick={goNext}>Вперед</Button>
+            <Button disabled={(name.length > 1 && phone.length > 10 && chosedDate) ? false : true} sx={{fontSize:'1rem'}} onClick={goNext}>Вперед</Button>
           </>
         )
       case 1:
@@ -301,7 +335,7 @@ const BookingSteps = ({isAdmin}) => {
         return (
           <>
             <Button sx={{fontSize:'1rem'}} onClick={goBack}>Назад</Button>
-            <Button sx={{fontSize:'1rem'}} onClick={goNext}>Вперед</Button>
+            <Button disabled sx={{fontSize:'1rem'}} onClick={goNext}>Вперед</Button>
           </>
         )
       default:
@@ -314,7 +348,8 @@ const BookingSteps = ({isAdmin}) => {
     <>
       <Container disableGutters>
         <Box mt={15} maxWidth={'lg'}>
-          <Typography textAlign={'center'} variant='h2' color={'info.main'}>Бронирование {goToLowerCase(type.name[1])}</Typography>
+          <Typography textAlign={'center'} variant='h3' color={'info.main'}>Бронирование {goToLowerCase(type.name[1])}</Typography>
+          {isAdmin && <Typography textAlign={'center'} variant='subtitle1' color={'error.main'}>Режим Администратора</Typography>}
         </Box>
         <Box maxWidth={'lg'} width={'100%'} mt={5}>
           <Card sx={{p:2}}>

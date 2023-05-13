@@ -17,6 +17,7 @@ import LightIcon from '@mui/icons-material/Light';
 import PowerOutlinedIcon from '@mui/icons-material/PowerOutlined';
 import KebabDiningOutlinedIcon from '@mui/icons-material/KebabDiningOutlined';
 import ForestOutlinedIcon from '@mui/icons-material/ForestOutlined';
+import LoginIcon from '@mui/icons-material/Login';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -31,23 +32,32 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Chip from '@mui/material/Chip'
 import Stack from '@mui/material/Stack'
+import { getPriceList } from '../api/ordersAPI'
+import { useEffect } from 'react'
 
-const besedki = [{name:'Малая', human: 'до 10 чел', price: '1500 руб/день'}, {name:'Большая', human: 'до 30 чел', price: '2500 руб/день'}]
-const bani = [{name:'Баня', human: 'до 4 чел', price: '1500 руб/ч'}]
-const fishes = [{name:'Карп, амур', price: '300 руб/кг'}, {name:'Судак', price: '500 руб/кг'}, {name: 'Карась', price:'Бесплатно'}]
+const PriceList = ({priceList}) => {
 
-const PriceList = () => {
-  return (
-    <Layout title={'Прайс-лист'}>
-      <Container>
-        <Box mt={15} maxWidth={'lg'}>
-          <Typography textAlign={'center'} variant='h2' color={'info.main'}>Прайс-лист</Typography>
-        </Box>
-      </Container>
-      <Grid direction={'column'} container xs={12} minHeight={''} mt={0} width={'100%'} justifyContent={'center'} alignItems={'center'}>
-        <Typography mb={3} textAlign={'center'} variant='subtitle'>{'Вход для рыбаков - 200 руб. Для остальных бесплатно.'}</Typography>
-        <Grid width={'100%'}>
-          <CardPrice href={'/booking?type=kiosk'} rows={besedki} title={'Беседки'} icon={<DeckIcon sx={{fontSize:190}} />}>
+  const showIcon = (title) => {
+    switch (title) {
+      case 'Беседки':
+        return <DeckIcon sx={{fontSize:190}} />
+      case 'Бани':
+        return <HotTubIcon sx={{fontSize:190}} />
+      case 'Рыба':
+        return <PhishingIcon sx={{fontSize:190}} />
+      case 'Вход':
+        return <LoginIcon sx={{fontSize:190}} />
+        break;
+    
+      default:
+        break;
+    }
+  }
+
+  const showAccordion = (title) => {
+    switch (title) {
+      case 'Беседки':
+          return (
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon  />}>
                 <Typography variant='h6'>Подробно</Typography>
@@ -70,16 +80,42 @@ const PriceList = () => {
                 </Grid>
               </AccordionDetails>
             </Accordion>
-          </CardPrice>
-        </Grid>
-        <Grid width={'100%'}>
-          <CardPrice booking={false} href='/' rows={bani} title={'Баня'} icon={<HotTubIcon sx={{fontSize:190}} />} />
-        </Grid>
-        <Grid width={'100%'}>
-          <CardPrice booking={false} href={'/'} withHuman={false} rows={fishes} title={'Рыба'} icon={<PhishingIcon sx={{fontSize:190}} />} />
-        </Grid>
+          )
+        break;
+      default:
+        break;
+    }
+  }
+
+  return (
+    <Layout title={'Прайс-лист'} description={'Прайс лист Баканское озеро'}>
+      <Container>
+        <Box mt={15} maxWidth={'lg'}>
+          <Typography textAlign={'center'} variant='h2' color={'info.main'}>Прайс-лист</Typography>
+        </Box>
+      </Container>
+      <Grid direction={'column'} container xs={12} minHeight={''} mt={0} width={'100%'} justifyContent={'center'} alignItems={'center'}>
+        {priceList.map((pl) => {
+          return (
+            <Grid key={pl.title} width={'100%'}>
+              <CardPrice icon={showIcon(pl.title)} title={pl.title} rows={pl.rows} booking={pl.booking} href={`/booking?type=${pl.type}`} withHuman={pl.withHumans}>
+                {showAccordion(pl.title)}
+              </CardPrice>
+            </Grid>
+          )
+        })}
       </Grid>
     </Layout>
   )
 }
 export default PriceList
+
+export async function getStaticProps() {
+  const priceList = await getPriceList()
+
+  return {
+    props: {
+      priceList
+    },
+  };
+}

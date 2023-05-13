@@ -48,7 +48,7 @@ const OrderPhone = () => {
         
       </Snackbar> */}
       <Box gap={2} sx={{display:'flex', flexDirection:'column', justifyContent:'center', width:'100%', alignItems:'center'}}>
-        <Typography textAlign={'center'} variant='h3'>Нужна помощь с бронированием?</Typography>
+        <Typography textAlign={'center'} variant='h4'>Нужна помощь с бронированием?</Typography>
         <Typography variant='body1'>Свяжитесь с нами по телефону</Typography>
         <Typography variant='h4' color={'info.main'}>+7 918 951-64-99</Typography>
         <Typography variant='body1'>Или оставьте заявку на сайте</Typography>

@@ -40,7 +40,7 @@ export default function Home() {
 
 
   return (
-    <Layout title={'Баканское озеро'}>
+    <Layout title={'Баканское озеро'} description={'База отдыха баканское озеро'}>
       
       <Box width={'100%'} minHeight={'75vh'} sx={{backgroundImage: `url(${bgImage.src})`, backgroundSize: 'cover', backgroundPosition:'center', display:'grid', placeItems:'center'}}>
         <Container>

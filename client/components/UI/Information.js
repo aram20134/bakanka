@@ -17,7 +17,7 @@ function Information() {
         <Grid container item xs={11} spacing={3} alignItems="center" sx={{ mx: "auto" }}>
           <Grid item xs={12} lg={4} sx={{ mx: "auto" }}>
             {/* <Image  /> */}
-            <Image src={img} style={{width:'100%', height:'100%'}} />
+            <Image alt='Баканское озеро' src={img} style={{width:'100%', height:'100%'}} />
           </Grid>
           <Grid item xs={12} lg={7} sx={{ ml: "auto" }}>
             <Grid container spacing={3}>

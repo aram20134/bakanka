@@ -81,7 +81,7 @@ function ResponsiveAppBar() {
         <Toolbar disableGutters>
           <Link href={'/'}>
             <Stack gap={2} direction={'row'} alignItems={'center'} sx={{display: { xs: 'none', md: 'flex' }}}>
-              <Image src={logo} width={50} height={50} />
+              <Image alt='лого баканское озеро' src={logo} width={50} height={50} />
               <Typography variant="h5" noWrap sx={{ mr: 2, fontWeight: 700, letterSpacing: '.1rem', color: 'inherit', textDecoration: 'none',}}>
                 Баканское озеро
               </Typography>
@@ -107,7 +107,7 @@ function ResponsiveAppBar() {
           <Box sx={{flexGrow:1, flexDirection:'row'}}>
             <Link href={'/'}>
               <Stack sx={{display: { xs: 'flex', md: 'none' }}} direction={'row'} alignItems={'center'} gap={2}>
-                <Image src={logo} width={40} height={40} />
+                <Image alt='лого баканское озеро' src={logo} width={40} height={40} />
                 <Typography variant={'h6'} textAlign={'center'} sx={{ mr: 2, fontWeight: 700, letterSpacing: '.1rem', color: 'inherit', textDecoration: 'none'}}>
                   Баканское озеро
                 </Typography>

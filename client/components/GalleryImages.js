@@ -18,7 +18,7 @@ const DrawImage = ({img}) => {
   if (img.image.split('.').pop() === 'mp4') {
     return (
       <Button data-poster={`${process.env.NEXT_PUBLIC_API_URL}/gallery/getImage?image=${img.poster}&poster=true&q=80&w=390&h=600`} data-video={`{"source": [{"src":"${`${process.env.NEXT_PUBLIC_STATIC_URL}/gallery/${img.image}`}", "type": "video/mp4"}], "attributes": {"preload": false, "controls": true, "playsinline": true}}`}>
-        <img alt='' width={'100%'} height={'100%'} src={`http://192.168.1.248:5999/api/gallery/getImage?image=${img.poster}&poster=true&q=80&w=390&h=600`} />
+        <img alt='' width={'100%'} height={'100%'} src={`${process.env.NEXT_PUBLIC_API_URL}/gallery/getImage?image=${img.poster}&poster=true&q=80&w=390&h=600`} />
       </Button>  
     )
   }

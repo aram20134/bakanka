@@ -21,7 +21,7 @@ const CardPrice = ({icon, title, rows, withHuman = true, description, children, 
     <>
       <Container>
         <Box mt={5} maxWidth={'lg'}>
-          <Card>
+          <Card elevation={10}>
             <Typography mb={3} textAlign={'center'} variant='h4'>{title}</Typography>
             <Grid gap={5} alignItems={'center'}  justifyContent={'center'} container>
               <Grid display={'flex'} xs={12} sm={6} item sx={{justifyContent:{xs:'center', sm:'flex-end'}}} alignItems={'center'}>
@@ -44,7 +44,7 @@ const CardPrice = ({icon, title, rows, withHuman = true, description, children, 
                             {row.name}
                           </TableCell>
                           {withHuman && <TableCell align="right">{row.human}</TableCell>}
-                          <TableCell align="right">{row.price}</TableCell>
+                          <TableCell align="right">{row.price + ' ' + row?.typePrice}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

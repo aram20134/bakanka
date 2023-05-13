@@ -83,31 +83,42 @@ export const orderPhoneApi = async ({phone, name, comm}) => {
   return data
 }
 
-export const getPriceYandex = async ({value, description}) => {
-  let body = JSON.stringify({
-    "amount": {
-      "value": `"${value}"`,
-      "currency": "RUB"
-    },
-    "confirmation": {
-      "type": "embedded"
-    },
-    "capture": true,
-    "description": `"${description}"`
-  });
-  const key = uuidv4()
-  let config = {
-    method: 'post',
-    maxBodyLength: Infinity,
-    url: 'https://api.yookassa.ru/v3/payments',
-    headers: { 
-      'Idempotence-Key': key, 
-      'Content-Type': 'application/json', 
-      'Authorization': 'Basic MzE3NjA4OnRlc3RfRFRkWVBJMUxsSUVFa1dFUjhyUVVpZ2JvSDdNczYwR001MGlUTUpzX2ZHUQ=='
-    },
-    data: body
-  };
+export const getPriceYandex = async ({value, description, metadata}) => {
+  const {data} = await host.post('/getPriceYandex', {value, description, metadata})
+  return data
+}
 
-  const {data} = await axios.request(config)
+export const getOrderById = async (id) => {
+  const {data} = await host.post('/getOrderById', {id})
+  return data
+}
+
+export const getPaymentInfo = async (id) => {
+  const {data} = await host.post('/getPaymentInfo', {id})
+  return data
+}
+
+export const acceptOrder = async (id) => {
+  const {data} = await host.post('/acceptOrder', {id})
+  return data
+}
+
+export const getPriceList = async () => {
+  const {data} = await host.get('/pl/getPriceList')
+  return data
+}
+
+export const verifyToken = async (token) => {
+  const {data} = await authHost.post('/verifyToken', {token})
+  return data
+}
+
+export const changePriceListRows = async (id, rows) => {
+  const {data} = await authHost.post('/changePriceListRows', {id, rows})
+  return data
+}
+
+export const delPriceListRow = async (id, rows) => {
+  const {data} = await authHost.post('/delPriceListRow', {id, rows})
   return data
 }

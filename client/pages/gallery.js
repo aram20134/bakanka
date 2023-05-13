@@ -8,7 +8,7 @@ import GalleryImages from '../components/GalleryImages';
 export const Gallery = ({images}) => {
   
   return (
-    <Layout title={'Галерея'}>
+    <Layout title={'Галерея'} description={'Галерея баканское озеро'}>
       <Box m={'8rem auto'} maxWidth={'lg'}>
         <Typography mb={2} textAlign={'center'} variant='h2' color={'info.main'}>Галерея</Typography>
         <Grid container>

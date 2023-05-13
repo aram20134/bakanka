@@ -4,10 +4,10 @@ const Booking = new Schema({
   day:{ type: Date },
   type: { type: String },
   title: { type: Array },
-  email: { type: String },
+  name: { type: String },
   phoneNumber: { type: String },
   totalPrice: { type: Number },
-  isActive: { type: Boolean, default: false },
+  status: { type: String, default: 'Не оплачено' },
   description: { type: String }
 })
 

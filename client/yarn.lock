@@ -466,7 +466,7 @@
   dependencies:
     "@babel/runtime" "^7.21.0"
 
-"@mui/material@^5.0.0", "@mui/material@^5.12.1", "@mui/material@^5.8.6":
+"@mui/material@^5.0.0", "@mui/material@^5.12.1", "@mui/material@^5.4.1", "@mui/material@^5.8.6":
   "integrity" "sha512-m+G9J6+FzIMhRqKV2y30yONH97wX107z9EWgiNCeS1/+y1CnytFZNG1ENdOuaJo1NimCRnmB/iXPvoOaSo6dOg=="
   "resolved" "https://registry.npmjs.org/@mui/material/-/material-5.12.1.tgz"
   "version" "5.12.1"
@@ -503,7 +503,7 @@
     "csstype" "^3.1.2"
     "prop-types" "^15.8.1"
 
-"@mui/system@^5.12.1", "@mui/system@^5.8.0":
+"@mui/system@^5.12.1", "@mui/system@^5.4.1", "@mui/system@^5.8.0":
   "integrity" "sha512-Po+sicdV3bbRYXdU29XZaHPZrW7HUYUqU1qCu77GCCEMbahC756YpeyefdIYuPMUg0OdO3gKIUfDISBrkjJL+w=="
   "resolved" "https://registry.npmjs.org/@mui/system/-/system-5.12.1.tgz"
   "version" "5.12.1"
@@ -522,16 +522,27 @@
   "resolved" "https://registry.npmjs.org/@mui/types/-/types-7.2.4.tgz"
   "version" "7.2.4"
 
-"@mui/utils@^5.11.13", "@mui/utils@^5.12.0":
-  "integrity" "sha512-RmQwgzF72p7Yr4+AAUO6j1v2uzt6wr7SWXn68KBsnfVpdOHyclCzH2lr/Xu6YOw9su4JRtdAIYfJFXsS6Cjkmw=="
-  "resolved" "https://registry.npmjs.org/@mui/utils/-/utils-5.12.0.tgz"
-  "version" "5.12.0"
+"@mui/utils@^5.11.13", "@mui/utils@^5.12.0", "@mui/utils@^5.12.3":
+  "integrity" "sha512-D/Z4Ub3MRl7HiUccid7sQYclTr24TqUAQFFlxHQF8FR177BrCTQ0JJZom7EqYjZCdXhwnSkOj2ph685MSKNtIA=="
+  "resolved" "https://registry.npmjs.org/@mui/utils/-/utils-5.12.3.tgz"
+  "version" "5.12.3"
   dependencies:
     "@babel/runtime" "^7.21.0"
     "@types/prop-types" "^15.7.5"
     "@types/react-is" "^16.7.1 || ^17.0.0"
     "prop-types" "^15.8.1"
     "react-is" "^18.2.0"
+
+"@mui/x-data-grid@^6.4.0":
+  "integrity" "sha512-rFpjJh4ZTJW3JnjmTsn5B32PMMJtjxTdRZyjn3Re5K/BA/iJQvN1qHO26qoqbo4Vt3b3dbRLThM/Q0N59PL2Fw=="
+  "resolved" "https://registry.npmjs.org/@mui/x-data-grid/-/x-data-grid-6.4.0.tgz"
+  "version" "6.4.0"
+  dependencies:
+    "@babel/runtime" "^7.21.0"
+    "@mui/utils" "^5.12.3"
+    "clsx" "^1.2.1"
+    "prop-types" "^15.8.1"
+    "reselect" "^4.1.8"
 
 "@mui/x-date-pickers@^6.2.1":
   "integrity" "sha512-pLSqzxJWgO2MV6so8A4LEGr1nDQuKJugKKP32Ej/YXGqUfW3CS1bHoYeuavO+Y/5JH4qnf7BPvcGEVXIjqTGTA=="
@@ -2609,6 +2620,11 @@
     "call-bind" "^1.0.2"
     "define-properties" "^1.2.0"
     "functions-have-names" "^1.2.3"
+
+"reselect@^4.1.8":
+  "integrity" "sha512-ab9EmR80F/zQTMNeneUr4cv+jSwPJgIlvEmVwLerwrWVbpLlBuls9XHzIeTFy4cegU2NHBp3va0LKOzU5qFEYQ=="
+  "resolved" "https://registry.npmjs.org/reselect/-/reselect-4.1.8.tgz"
+  "version" "4.1.8"
 
 "resolve-from@^4.0.0":
   "integrity" "sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g=="

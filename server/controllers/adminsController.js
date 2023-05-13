@@ -59,6 +59,20 @@ class AdminsController {
       res.status(500).send(e)
     }
   }
+  async verifyToken(req, res) {
+    try {
+      const {token} = req.body
+      if (!token) {
+          return res.status(401).json({message:"Не авторизован"})
+      }
+      const decoded = jwt.verify(token, process.env.SECRET_KEY)
+      const newToken = signJWT({name: decoded.name})
+      res.send(newToken)
+    } catch (e) {
+      console.log(e)
+      res.status(500).send(e)
+    }
+  }
 }
 
 module.exports = new AdminsController()

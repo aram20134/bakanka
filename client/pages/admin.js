@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useId, useRef, useState } from 'react'
 import Layout from '../components/Layout'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -26,7 +26,7 @@ import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import TablePagination from '@mui/material/TablePagination';
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import ReorderOutlinedIcon from '@mui/icons-material/ReorderOutlined';
-import { changeDesc, delOrder, getAdminImages, getAdminReviews, getAllOrders, getReviews, logAdmin } from '../api/ordersAPI'
+import { changeDesc, changePriceListRows, delOrder, delPriceListRow, getAdminImages, getAdminReviews, getAllOrders, getPriceList, getReviews, logAdmin, verifyToken } from '../api/ordersAPI'
 import Chip from '@mui/material/Chip'
 import DeckIcon from '@mui/icons-material/Deck';
 import isToday  from 'date-fns/isToday'
@@ -44,23 +44,36 @@ import TableFooter from '@mui/material/TableFooter'
 import Booking from './booking'
 import Link from 'next/link'
 import { authProvider } from './_app'
-import { Alert, CircularProgress, InputLabel, MenuItem, Rating, Select, TextField } from '@mui/material'
-import { getCookie, hasCookie, setCookie } from 'cookies-next'
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Badge, CircularProgress, InputLabel, MenuItem, Rating, Select, TextField } from '@mui/material'
+import { getCookie, hasCookie, setCookie, setCookies } from 'cookies-next'
 import SearchIcon from '@mui/icons-material/Search';
 import Review from '../components/UI/Review'
 import LandscapeIcon from '@mui/icons-material/Landscape';
 import GalleryImages from '../components/GalleryImages'
 import { useRouter } from 'next/router'
 import BookingSteps from '../components/BookingSteps'
+import PaymentIcon from '@mui/icons-material/Payment';
+import CardPrice from '../components/UI/CardPrice'
+
+import HotTubIcon from '@mui/icons-material/HotTub';
+import PhishingIcon from '@mui/icons-material/Phishing';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import LightIcon from '@mui/icons-material/Light';
+import PowerOutlinedIcon from '@mui/icons-material/PowerOutlined';
+import KebabDiningOutlinedIcon from '@mui/icons-material/KebabDiningOutlined';
+import ForestOutlinedIcon from '@mui/icons-material/ForestOutlined';
+import LoginIcon from '@mui/icons-material/Login';
+import { DataGrid, GridActionsCellItem, gridRowsLookupSelector, nlNL } from '@mui/x-data-grid';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Admin = ({ IsAdmin }) => {
   const [selectedIndex, setSelectedIndex] = useState(1)
   const [admin, setAdmin] = useState(IsAdmin)
   // const {admin, setAdmin} = useContext(authProvider)
+  const router = useRouter()
 
-  
 
-  const getOrderType = (type) => {
+  const getOrderType = (type, row) => {
     const types = [{key:'kiosk', title: 'Беседка', icon: <DeckIcon />}, {key:'hottub', title:'Баня'}]
     const filteredType = types.find((t) => t.key === type)
     return (
@@ -145,36 +158,61 @@ const Admin = ({ IsAdmin }) => {
       </Box>
     )
   }
-  const router = useRouter()
 
   const DrawChosedList = () => {
+    const [selected, setSelected] = useState('')
+    const [page, setPage] = useState(0)
+    const [rowsPerPage, setRowsPerPage] = useState(5)
+    const [orders, setOrders] = useState([])
+
+    useEffect(() => {
+      getAllOrders().then((res) => setOrders(res.sort((a, b) => new Date(b.day) - new Date(a.day))))
+    }, [])
+
+    const [reviews, setReviews] = useState([])
+    const [search, setSearch] = useState('')
+    const [filterRating, setFilterRating] = useState('')
+    const [priceList, setPriceList] = useState([])
+
+    useEffect(() => {
+      getAdminReviews().then((res) => setReviews(res))
+      getPriceList().then((res) => {
+        const newRows = res.map((pl) => ({...pl, rows: pl.rows.map((row, i) => ({...row, id: (Math.random().toString(36)+'00000000000000000').slice(2, 7)}))}))
+        setPriceList(newRows)
+      })
+    }, [])
+
+    const [images, setImages] = useState([])
+    const [adminMode, setAdminMode] = useState(true)
+    const [loading, setLoading] = useState(false)
+
+    const refreshImages = () => {
+      setLoading(true)
+      getAdminImages().then((res) => setImages(res)).finally(() => setLoading(false))
+    }
+
+    useEffect(() => {
+      refreshImages()
+    }, [])
 
     switch (router.query.page) {
       case 'orders':
-        const [selected, setSelected] = useState('')
         const isSelected = (id) => selected === id
-        const [page, setPage] = useState(0)
-        const [rowsPerPage, setRowsPerPage] = useState(5)
-        const [orders, setOrders] = useState([])
-
-
+        
         const handleSelect = (id) => {
           selected === id ? setSelected(0) : setSelected(id)
         }
 
-        useEffect(() => {
-          getAllOrders().then((res) => setOrders(res.sort((a, b) => new Date(b.day) - new Date(a.day))))
-        }, [])
-      
         return (
           <Grid xs item display={'flex'} flexDirection={'column'} gap={2}>
             <TableContainer elevation={5} component={Paper}>
               <Table>
                 <TableHead>
                   <TableRow>
+                    <TableCell>Статус</TableCell>
                     <TableCell>Тип заказа</TableCell>
                     <TableCell>Состав заказа</TableCell>
-                    <TableCell>Email</TableCell>
+                    <TableCell>Имя</TableCell>
                     <TableCell>Номер</TableCell>
                     <TableCell>Дата</TableCell>
                     <TableCell align='center'>Итоговая цена</TableCell>
@@ -191,11 +229,14 @@ const Admin = ({ IsAdmin }) => {
                     return (
                       <TableRow sx={{cursor:'pointer'}} selected={isItemSelected} hover role='checkbox' onClick={(e) => handleSelect(row._id)} key={row._id}>
                         <TableCell>
+                          {row.status === 'Оплачено' ? <Chip label={row.status} size='small' color='success' /> : <Chip label={row.status} size='small' color='error' />}
+                        </TableCell>
+                        <TableCell>
                           {/* <Checkbox checked={isItemSelected} onClick={(e) => handleSelect(row._id)} /> */}
-                          {getOrderType(row.type)}
+                          {getOrderType(row.type, row)}
                         </TableCell>
                         <TableCell>{getOrderTitle(row.title)}</TableCell>
-                        <TableCell>{row.email}</TableCell>
+                        <TableCell>{row.name}</TableCell>
                         <TableCell>{row.phoneNumber}</TableCell>
                         <TableCell>{getOrderDate(row.day)}</TableCell>
                         <TableCell align='center'>{row.totalPrice}</TableCell>
@@ -220,29 +261,7 @@ const Admin = ({ IsAdmin }) => {
             }
           </Grid>
         )
-      case 'booking':
-        // const router = useRouter()
-        // useEffect(() => {
-        //   router.push({pathname:'/admin', query: {page:'booking', type: 'kiosk'}})
-        // }, [])
-        
-
-        return (
-          <Grid item xs>
-            <Button onClick={() => router.push({pathname:'/admin', query: {page:'booking', type: 'kiosk'}})}>Беседка</Button>
-            <BookingSteps isAdmin={true} />
-          </Grid>
-        )
       case 'reviews':
-        const [reviews, setReviews] = useState([])
-        const [search, setSearch] = useState('')
-        const [filterRating, setFilterRating] = useState('')
-
-        useEffect(() => {
-          console.log('rev')
-          getAdminReviews().then((res) => setReviews(res))
-        }, [])
-
         return (
           <Grid item xs>
             <Grid item xs={12}>
@@ -273,19 +292,6 @@ const Admin = ({ IsAdmin }) => {
           </Grid>
         )
       case 'gallery':
-        const [images, setImages] = useState([])
-        const [adminMode, setAdminMode] = useState(true)
-        const [loading, setLoading] = useState(false)
-
-        const refreshImages = () => {
-          setLoading(true)
-          getAdminImages().then((res) => setImages(res)).finally(() => setLoading(false))
-        }
-
-        useEffect(() => {
-          refreshImages()
-        }, [])
-        
         return (
           <Grid item xs minWidth={'320px'}>
             <Box mb={1} display={'flex'} gap={2}>
@@ -293,6 +299,100 @@ const Admin = ({ IsAdmin }) => {
               <Button disabled={loading} onClick={refreshImages} variant='outlined'>{loading ? <CircularProgress size={15} /> : 'Обновить галерею'}</Button>
             </Box>
             <GalleryImages adminMode={adminMode} images={images} setImages={setImages} />
+          </Grid>
+        )
+      case 'price-list':
+        const showIcon = (title) => {
+          switch (title) {
+            case 'Беседки':
+              return <DeckIcon sx={{fontSize:190}} />
+            case 'Бани':
+              return <HotTubIcon sx={{fontSize:190}} />
+            case 'Рыба':
+              return <PhishingIcon sx={{fontSize:190}} />
+            case 'Вход':
+              return <LoginIcon sx={{fontSize:190}} />
+            default:
+              break;
+          }
+        }
+
+        const delRow = (row) => {
+          const id = priceList.filter((rowList) => rowList.rows.filter((opt) => opt.id === row.id).length ? true : false)[0]._id
+          const newPriceList = priceList.map((rowList) => ({...rowList, rows: rowList.rows.filter((opt) => opt.id !== row.id)}))
+          const newRows = newPriceList.filter((newRows) => newRows._id === id)[0].rows
+          console.log(newRows, id)
+          delPriceListRow(id, newRows).then((res) => setPriceList(res))
+        }
+
+        const columns = [{
+          field: 'name',
+          headerName: 'Название',
+          editable:true
+        }, {
+          field: 'human',
+          headerName: 'Макс. кол-во людей',
+          editable:true
+        }, {
+          field: 'price',
+          headerName: 'Цена',
+          editable:true
+        }, {
+          field: 'typePrice',
+          headerName: 'Тип цены',
+          editable:true,
+          // type: 'singleSelect',
+          // valueOptions: ['руб/ч', 'руб/день', 'руб/кг', 'руб', '']
+        }, {
+          field: 'actions',
+          type: 'actions',
+          getActions: (row) => [
+            <GridActionsCellItem onClick={() => delRow(row)} icon={<DeleteIcon />} label="Delete" />,
+          ]
+        }]
+
+        const onEditingEnd = (cell, e, id, rows) => {
+          if (cell.reason === "cellFocusOut") {
+            return e.defaultMuiPrevented = true;
+          }
+          const editedRows = rows.map((row) => row.id === cell.id ? ({...row, [cell.field]: e.target.value}) : row)
+          changePriceListRows(id, editedRows).then((res) => setPriceList(res))
+        }
+        
+
+        return (
+          <Grid item xs>
+            <Grid direction={'column'} container xs={12} minHeight={''} mt={0} width={'100%'} justifyContent={'center'} alignItems={'center'}>
+              {priceList.map((pl, i) => {
+                // const newRows = pl.rows.map((row, i) => ({...row, id: (Math.random().toString(36)+'00000000000000000').slice(2, 7)}))
+                return (
+                  <Grid key={pl._id} width={'100%'}>
+                    <CardPrice icon={showIcon(pl.title)} title={pl.title} rows={pl.rows} booking={pl.booking} href={`/booking?type=${pl.type}&mode=admin`} withHuman={pl.withHumans}>
+                      <Accordion>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon  />}>
+                          <Typography color={'info.main'} variant='h6'>Изменить</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Box width={'100%'}>
+                            <DataGrid onCellEditStop={(cell, e) => onEditingEnd(cell, e, pl._id, pl.rows)} autoHeight rows={pl.rows} columns={columns} />
+                            <Button onClick={() => setPriceList(prev => prev.map((row) => row._id !== pl._id ? row : {...row, rows: [...row.rows, {id: 333, name: 'test'}]}))}>Добавить строку</Button>
+                            {console.log(priceList)}
+                            {/* {pl.rows.map((row) => (
+                              <Grid item display={'flex'} gap={2}>
+                                <Typography>{row.name}</Typography>
+                                <Typography>{row.human}</Typography>
+                                <Typography>{row.price}</Typography>
+                                <Typography>{row.typePrice}</Typography>
+                              </Grid>
+                            ))} */}
+                          </Box>
+                        </AccordionDetails>
+                      </Accordion>
+                    </CardPrice>
+                  </Grid>
+                )
+              })}
+            </Grid>
           </Grid>
         )
       default:
@@ -346,10 +446,6 @@ const Admin = ({ IsAdmin }) => {
                 <ListItemIcon><ReorderOutlinedIcon /></ListItemIcon>
                 <ListItemText primary='Заказы' />
               </ListItemButton>
-              <ListItemButton selected={router.query.page === 'booking'} onClick={() => router.push({pathname:'/admin', query: {page: 'booking'}})}>
-                <ListItemIcon><CalendarMonthOutlinedIcon /></ListItemIcon>
-                <ListItemText primary='Бронь' />
-              </ListItemButton>
               <ListItemButton selected={router.query.page === 'reviews'} onClick={() => router.push({pathname:'/admin', query: {page: 'reviews'}})}>
                 <ListItemIcon><ReviewsIcon /></ListItemIcon>
                 <ListItemText primary='Отзывы' />
@@ -357,6 +453,10 @@ const Admin = ({ IsAdmin }) => {
               <ListItemButton selected={router.query.page === 'gallery'} onClick={() => router.push({pathname:'/admin', query: {page: 'gallery'}})}>
                 <ListItemIcon><LandscapeIcon /></ListItemIcon>
                 <ListItemText primary='Галерея' />
+              </ListItemButton>
+              <ListItemButton selected={router.query.page === 'price-list'} onClick={() => router.push({pathname:'/admin', query: {page: 'price-list'}})}>
+                <ListItemIcon><PaymentIcon /></ListItemIcon>
+                <ListItemText primary='Прайс' />
               </ListItemButton>
             </List>
           </Grid>
@@ -368,12 +468,20 @@ const Admin = ({ IsAdmin }) => {
 }
 
 export async function getServerSideProps({req, res}) {
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=10, stale-while-revalidate=59'
+  )
   var cookie
   if (hasCookie('token', { req, res })) {
     cookie = getCookie('token', { req, res });
+    await verifyToken(cookie).then((tk) => cookie = tk).catch(() => cookie = false)
   } else {
     cookie = false
   }
+
+  setCookies('token', cookie, {req, res})
+
   return {
     props: {
       IsAdmin: cookie
@@ -382,3 +490,4 @@ export async function getServerSideProps({req, res}) {
 }
 
 export default Admin
+
