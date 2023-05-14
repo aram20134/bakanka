@@ -4,7 +4,7 @@ import { Box, Button, Container, Typography } from '@mui/material'
 import Link from 'next/link'
 import WarningIcon from '@mui/icons-material/Warning';
 
-export const e404 = () => {
+export const e500 = () => {
   return (
     <Layout title={'Не найдено'}>
       <Container sx={{mt:20, textAlign:'center'}} disableGutters>
@@ -19,4 +19,4 @@ export const e404 = () => {
   )
 }
 
-export default e404
+export default e500
