@@ -50,16 +50,16 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Paper from '@mui/material/Paper'
 import Badge from '@mui/material/Badge'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { Alert, Stack } from '@mui/material'
+import { Alert, FormControl, Stack } from '@mui/material'
 import PhoneInput from 'react-phone-input-2'
 import { getCookie, setCookie } from 'cookies-next'
 import Link from 'next/link'
+import HotTubIcon from '@mui/icons-material/HotTub';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const types = [{key: 'kiosk', name:['Беседка', 'Беседки']}]
-const steps = ['Выберите дату посещения', 'Выберите беседку', 'Оплата']
+const types = [{key: 'kiosk', name:['Беседка', 'Беседки'], steps: ['Выберите дату посещения', 'Выберите беседку', 'Оплата']}, {key: 'bath', name: ['Баня', 'Бани'], steps: ['Выберите дату посещения', 'Дополнительно', 'Оплата']}]
 
 const BookingSteps = ({priceList}) => {
   const router = useRouter()
@@ -71,14 +71,16 @@ const BookingSteps = ({priceList}) => {
   const [orderedBooking, setOrderedBooking] = useState([])
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [priceListFiltered, setPriceListFiltered] = useState([])
   const [markers, setMarkers] = useState([{top: 47.564921596283085, left: 58.13356164383562, title:'Беседка №1', type: 'Малая'}, {top: 31.42288226997428, left: 56.93493150684932, title: 'Беседка №2', type: 'Малая'}, {top: 25.26341989546171, left: 37.071917808219176, title:'Беседка №3', type: 'Малая'}, {top: 50.21986227495229, left: 36.215753424657535, title:'Большая беседка', type: 'Большая'}])
   // const [loaded, setLoaded] = useState(false)
-
   
 
   useEffect(() => {
-    setChosedBooking([])
-  }, [chosedDate])
+    if (type?.key !== 'bath') {
+      setChosedBooking([])
+    }
+  }, [chosedDate, type])
 
   useEffect(() => {
     if (router.query.mode === 'admin') {
@@ -88,21 +90,21 @@ const BookingSteps = ({priceList}) => {
       }).catch(() => setIsAdmin(false))
     }
   }, [router])
-
-  useEffect(() => {
-    console.log(isAdmin)
-  }, [isAdmin])
-  
   
   useEffect(() => {
     if (activeStep === 2 && !isAdmin) {
       console.log(router.query.mode)
-      const fullPrice = chosedBooking.reduce((acc, cur) => {
-        acc += Number(cur.price)
-        return acc
-      }, 0)
+      var fullPrice
+        if (type.key === 'kiosk') {
+          fullPrice = chosedBooking.reduce((acc, cur) => {
+            acc += Number(cur.price)
+            return acc
+          }, 0)
+        } else {
+          fullPrice = numberHours * chosedBooking[0].price
+        }
       var checkout
-      addOrder({day: chosedDate, title: chosedBooking, type: type.key, name, phoneNumber: phone, totalPrice: fullPrice}).then((order) => {
+      addOrder({day: chosedDate, title: {...chosedBooking, title: `${numberHuman} чел. на ${numberHours} ч`}, type: type.key, name, phoneNumber: phone, totalPrice: fullPrice}).then((order) => {
         getPriceYandex({value: fullPrice, description: 'Бронирование беседок', metadata: {orderId: order._id}}).then((payment) => {
           checkout = new window.YooMoneyCheckoutWidget({
             confirmation_token: payment.confirmation.confirmation_token, //Токен, который перед проведением оплаты нужно получить от ЮKassa
@@ -116,7 +118,7 @@ const BookingSteps = ({priceList}) => {
         })
       })
     }
-  }, [activeStep, order])
+  }, [activeStep])
   
   useEffect(() => {
     if (chosedDate) {
@@ -141,14 +143,27 @@ const BookingSteps = ({priceList}) => {
   }, [router])
 
   useEffect(() => {
-    if (type && priceList) {
+    if (type?.key && priceListFiltered?.rows) {
       // .filter((price) => price.rows.name === prev.type)
-      const typeList = priceList.filter((list) => list.type === type.key)[0]
-
-      setMarkers(prev => prev.map((marker) => ({...marker, ...typeList.rows.filter((row) => row.name === marker.type)[0]})))
-      console.log(type)
+      console.log(priceListFiltered.rows)
+      if (type.key === 'bath') {
+        setChosedBooking(priceListFiltered.rows)
+      }
+      setMarkers(prev => prev.map((marker) => ({...marker, ...priceListFiltered.rows.filter((row) => row.name === marker.type)[0]})))
     }
-  }, [type, priceList])
+  }, [type, priceListFiltered])
+
+  useEffect(() => {
+    console.log(priceListFiltered)
+  }, [priceListFiltered])
+  
+
+  useEffect(() => {
+    if (type) {
+      setPriceListFiltered(priceList.filter((list) => list.type === type.key)[0])
+    }
+  }, [type])
+  
   
   
   const goToLowerCase = (string) => {
@@ -160,12 +175,16 @@ const BookingSteps = ({priceList}) => {
   }
   
   const goNext = () => {
-    setActiveStep(prev => prev === steps.length ? prev : prev + 1)
+    setActiveStep(prev => prev === type.steps.length ? prev : prev + 1)
   }
 
   useEffect(() => {
     console.log(markers)
   }, [markers])
+
+  const [numberHuman, setNumberHuman] = useState(1)
+  const [numberHours, setNumberHours] = useState(2)
+  
   
 
   const CustomMarker = ({title, price, typePrice}) => {
@@ -218,36 +237,55 @@ const BookingSteps = ({priceList}) => {
             <LocalizationProvider adapterLocale={ru} dateAdapter={AdapterDateFns}>
               <DateCalendar disablePast value={chosedDate} onChange={(date) => setChosedDate(date)} />
               <Stack mt={1} gap={1}>
-                <DateField label='Дата' disablePast value={chosedDate} onChange={(date) => setChosedDate(date)}  />
-                <TextField onChange={(e) => setName(e.target.value)} label='Имя' />
+                <DateField required label='Дата' disablePast value={chosedDate} onChange={(date) => setChosedDate(date)}  />
+                <TextField required onChange={(e) => setName(e.target.value)} label='Имя' />
                 <PhoneInput value={phone} onChange={(e) => setPhone(e)} specialLabel='Телефон' inputStyle={{background:'transparent', height:'60px', width:'100%'}} countryCodeEditable={false} country={'ru'}  />
               </Stack>
+              {type.key === 'bath' && orderedBooking.length ? 
+              <Alert sx={{mt:2}} severity='warning'>На этот день нет свободных бань</Alert> : ''}
             </LocalizationProvider>
           </Box>
         )
       case 1:
         return (
-          <Box p={2}>
-            <ImageMarker markerComponent={CustomMarker} alt='map' markers={markers} src={bgMap.src} />
-            <Autocomplete isOptionEqualToValue={(opt, value) => opt.title === value.title} value={chosedBooking} onChange={(e, newValue) => setChosedBooking(newValue)} sx={{mt:2}} multiple options={markers.filter((val) => !orderedBooking.find((ordered) => val.label === ordered.title))} getOptionLabel={(opt) => opt.title} 
-              renderOption={(props, option, {selected}) => (
-                <li {...props}>
-                  <Checkbox icon={icon} checkedIcon={checkedIcon} checked={selected} />
-                  {option.title}
-                </li>
-              )} 
-              renderInput={(params) => (
-                <TextField {...params} label='Выбранные беседки' />
-              )}
-            />
-          </Box>
+          type.key === 'kiosk' ? (
+            <Box p={2}>
+              <ImageMarker markerComponent={CustomMarker} alt='map' markers={markers} src={bgMap.src} />
+              <Autocomplete isOptionEqualToValue={(opt, value) => opt.title === value.title} value={chosedBooking} onChange={(e, newValue) => setChosedBooking(newValue)} sx={{mt:2}} multiple options={markers.filter((val) => !orderedBooking.find((ordered) => val.label === ordered.title))} getOptionLabel={(opt) => opt.title} 
+                renderOption={(props, option, {selected}) => (
+                  <li {...props}>
+                    <Checkbox icon={icon} checkedIcon={checkedIcon} checked={selected} />
+                    {option.title}
+                  </li>
+                )} 
+                renderInput={(params) => (
+                  <TextField {...params} label='Выбранные беседки' />
+                )}
+              />
+            </Box>
+          ) : (
+            <Box p={2} gap={2} textAlign={'center'} display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
+              <Typography variant='h5'>Заполните дополнительные поля</Typography>
+              <form style={{display:'flex', flexDirection:'column', gap:20}} id='form' onSubmit={goNext} onInvalid={(e) => console.log('err')}>
+                <TextField value={numberHuman} onChange={(e) => setNumberHuman(e.target.value)} onInvalid={() => console.log('first')} defaultValue={1} required sx={{minWidth:'200px'}} type='number' inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', max: 4, min: 1 }} helperText='Не более 4 людей' label='Кол-во людей' />
+                <TextField value={numberHours} onChange={(e) => setNumberHours(e.target.value)} type='number' defaultValue={2} required helperText='не менее 2 часов' label='Кол-во часов' inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', max: 10, min: 2 }} />
+              </form>
+              <Typography variant='subtitle1'>Цена: {numberHours * chosedBooking[0].price} рублей</Typography>
+            </Box>
+          )
         )
       case 2:
         const label = chosedBooking.map((val) => val.title).join(', ')
-        const fullPrice = chosedBooking.reduce((acc, cur) => {
-          acc += Number(cur.price)
-          return acc
-        }, 0)
+
+        var fullPrice
+        if (type.key === 'kiosk') {
+          fullPrice = chosedBooking.reduce((acc, cur) => {
+            acc += Number(cur.price)
+            return acc
+          }, 0)
+        } else {
+          fullPrice = numberHours * chosedBooking[0].price
+        }
         
         return (
           <Box p={2} display={'flex'} flexDirection={'column'} gap={2} alignItems={'flex-start'}>
@@ -256,10 +294,14 @@ const BookingSteps = ({priceList}) => {
               <ListItem disableGutters>
                 <ListItemAvatar>
                   <Avatar sx={{bgcolor:'success.main'}}>
-                    <DeckIcon  />
+                    {type.key === 'kiosk' ? (
+                      <DeckIcon  />
+                    ) : (
+                      <HotTubIcon />
+                    )}
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary='Беседка' secondary={label} />
+                <ListItemText primary={type.key === 'kiosk' ? 'Беседка' : 'Баня'} secondary={label} />
               </ListItem>
               <ListItem disableGutters>
                 <ListItemAvatar>
@@ -275,8 +317,18 @@ const BookingSteps = ({priceList}) => {
                 <TableBody>
                   {chosedBooking.map((row) => (
                     <TableRow key={row.title}>
-                      <TableCell scope='row'>{row.title}</TableCell>
-                      <TableCell align='right'>{row.price + ' ' + row.typePrice}</TableCell>
+                      {type.key === 'kiosk' ? (
+                        <>
+                          <TableCell scope='row'>{row.title}</TableCell>
+                          <TableCell align='right'>{row.price + ' ' + row.typePrice}</TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell scope='row'>{row.title} на {numberHours} часа(-ов)</TableCell>
+                          <TableCell align='right'>{fullPrice + ' ' + row.typePrice}</TableCell>
+                        </>
+                      )}
+                      
                     </TableRow>
                   ))}
                   <TableRow>
@@ -292,7 +344,11 @@ const BookingSteps = ({priceList}) => {
             {isAdmin ? (
               <>
                 <Typography alignSelf={'center'} color={'info.main'} variant='h5'>Нажмите на кнопку для брони</Typography>
-                <Button onClick={() => addOrder({day: chosedDate, title: chosedBooking, type: type.key, name, phoneNumber: phone, totalPrice: fullPrice}).then((order) => {setActiveStep(3), acceptOrder(order._id)})} sx={{alignSelf:'center'}} variant='contained' color='success'>Забронировать</Button>
+                {type.key === 'kiosk' ? (
+                  <Button onClick={() => addOrder({day: chosedDate, title: chosedBooking, type: type.key, name, phoneNumber: phone, totalPrice: fullPrice}).then((order) => {setActiveStep(3), acceptOrder(order._id)})} sx={{alignSelf:'center'}} variant='contained' color='success'>Забронировать</Button>
+                ) : (
+                  <Button onClick={() => addOrder({day: chosedDate, title: {...chosedBooking, title: `${numberHuman} чел. на ${numberHours} ч`}, type: type.key, name, phoneNumber: phone, totalPrice: fullPrice}).then((order) => {setActiveStep(3), acceptOrder(order._id)})} sx={{alignSelf:'center'}} variant='contained' color='success'>Забронировать</Button>
+                )}
               </>
             ) : (
               <>
@@ -318,17 +374,27 @@ const BookingSteps = ({priceList}) => {
 
     switch (i) {
       case 0:
-        return (
+        return type === 'kiosk' ? (
           <>
             <Button disabled sx={{fontSize:'1rem'}} onClick={goBack}>Назад</Button>
             <Button disabled={(name.length > 1 && phone.length > 10 && chosedDate) ? false : true} sx={{fontSize:'1rem'}} onClick={goNext}>Вперед</Button>
           </>
+        ) : (
+          <>
+            <Button disabled sx={{fontSize:'1rem'}} onClick={goBack}>Назад</Button>
+            <Button disabled={(name.length > 1 && phone.length > 10 && chosedDate && !orderedBooking.length) ? false : true} sx={{fontSize:'1rem'}} onClick={goNext}>Вперед</Button>
+          </>
         )
       case 1:
-        return (
+        return type === 'kiosk' ? (
           <>
             <Button sx={{fontSize:'1rem'}} onClick={goBack}>Назад</Button>
-            <Button disabled={!chosedBooking.length && true} sx={{fontSize:'1rem'}} onClick={goNext}>Вперед</Button>
+            <Button onClcik={goNext} disabled={!chosedBooking.length && true} sx={{fontSize:'1rem'}}>Вперед</Button>
+          </>
+        ) : (
+          <>
+            <Button sx={{fontSize:'1rem'}} onClick={goBack}>Назад</Button>
+            <Button form='form' type='submit' disabled={!chosedBooking.length && true} sx={{fontSize:'1rem'}}>Вперед</Button>
           </>
         )
       case 2:
@@ -342,6 +408,7 @@ const BookingSteps = ({priceList}) => {
         break;
     }
   }
+  
   const orientation = useMediaQuery('(min-width:600px)') ? 'horizontal' : 'vertical'
 
   return type && (
@@ -354,15 +421,18 @@ const BookingSteps = ({priceList}) => {
         <Box maxWidth={'lg'} width={'100%'} mt={5}>
           <Card sx={{p:2}}>
             <Stepper sx={{alignItems:'center'}} orientation={orientation} alternativeLabel={orientation === 'vertical' ? false : true} activeStep={activeStep}>
-              {steps.map((label, i) => {
+              {type.steps.map((label, i) => {
                 var opt = ''
                 if (i === 0 && chosedDate) {
                   opt = new Date(chosedDate).toLocaleDateString()
                 }
-                if (i === 1 && chosedBooking.length > 0) {
+                if (i === 1 && chosedBooking.length > 0 && type.key === 'kiosk') {
                   const allOpts = chosedBooking.map((val) => val.title)
                   const label = allOpts.length > 1 ? 'Беседок ' + allOpts.length : allOpts
                   opt = 'Выбрано: ' + label
+                }
+                if (i === 1 && chosedBooking.length > 0 && type.key === 'bath') {
+                  opt = 'Выбрано: Баня'
                 }
                 return (
                   <Step key={label}>

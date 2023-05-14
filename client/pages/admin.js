@@ -74,7 +74,7 @@ const Admin = ({ IsAdmin }) => {
 
 
   const getOrderType = (type, row) => {
-    const types = [{key:'kiosk', title: 'Беседка', icon: <DeckIcon />}, {key:'hottub', title:'Баня'}]
+    const types = [{key:'kiosk', title: 'Беседка', icon: <DeckIcon />}, {key:'bath', title:'Баня', icon: <HotTubIcon />}]
     const filteredType = types.find((t) => t.key === type)
     return (
       <Box display={'flex'} gap={1}>
@@ -347,7 +347,7 @@ const Admin = ({ IsAdmin }) => {
           field: 'actions',
           type: 'actions',
           getActions: (row) => [
-            <GridActionsCellItem onClick={() => delRow(row)} icon={<DeleteIcon />} label="Delete" />,
+            <GridActionsCellItem key={row} onClick={() => delRow(row)} icon={<DeleteIcon />} label="Delete" />,
           ]
         }]
 

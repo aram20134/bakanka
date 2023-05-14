@@ -7,6 +7,7 @@ import Layout from '../components/Layout';
 import DeckIcon from '@mui/icons-material/Deck';
 import InsertInvitationOutlinedIcon from '@mui/icons-material/InsertInvitationOutlined';
 import ErrorIcon from '@mui/icons-material/Error';
+import HotTubIcon from '@mui/icons-material/HotTub';
 
 const Order = ({order, payment}) => {
   const router = useRouter()
@@ -16,6 +17,7 @@ const Order = ({order, payment}) => {
   useEffect(() => {
     console.log(orderRes)
     console.log(paymentRes)
+
   }, [])
   
   const label = orderRes.title.map((val) => val.title).join(', ')
@@ -31,10 +33,14 @@ const Order = ({order, payment}) => {
               <ListItem disableGutters>
                 <ListItemAvatar>
                   <Avatar sx={{bgcolor:'success.main'}}>
-                    <DeckIcon  />
+                    {orderRes.type === 'kiosk' ? (
+                      <DeckIcon  />
+                    ) : (
+                      <HotTubIcon />
+                    )}
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary='Беседка' secondary={label} />
+                <ListItemText primary={orderRes.type === 'kiosk' ? 'Беседка' : 'Баня'} secondary={label} />
               </ListItem>
               <ListItem disableGutters>
                 <ListItemAvatar>
@@ -51,7 +57,11 @@ const Order = ({order, payment}) => {
                   {orderRes.title.map((row) => (
                     <TableRow key={row.title}>
                       <TableCell scope='row'>{row.title}</TableCell>
-                      <TableCell align='right'>{row.price + ' ' + row.typePrice}</TableCell>
+                      {orderRes.type === 'kiosk' ? (
+                        <TableCell align='right'>{row.price + ' ' + row.typePrice}</TableCell>
+                      ) : (
+                        <TableCell align='right'>{Number(row.title.slice(10, 11)) * row[0].price + ' ' + row[0].typePrice}</TableCell>
+                      )}
                     </TableRow>
                   ))}
                   <TableRow>
