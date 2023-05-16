@@ -389,7 +389,7 @@ const BookingSteps = ({priceList}) => {
         return type === 'kiosk' ? (
           <>
             <Button sx={{fontSize:'1rem'}} onClick={goBack}>Назад</Button>
-            <Button onClcik={goNext} disabled={!chosedBooking.length && true} sx={{fontSize:'1rem'}}>Вперед</Button>
+            <Button onClick={goNext} disabled={!chosedBooking.length && true} sx={{fontSize:'1rem'}}>Вперед</Button>
           </>
         ) : (
           <>
