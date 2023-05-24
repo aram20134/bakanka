@@ -74,8 +74,10 @@ const Admin = ({ IsAdmin }) => {
 
 
   const getOrderType = (type, row) => {
+    console.log(type)
     const types = [{key:'kiosk', title: 'Беседка', icon: <DeckIcon />}, {key:'bath', title:'Баня', icon: <HotTubIcon />}]
     const filteredType = types.find((t) => t.key === type)
+    console.log(filteredType)
     return (
       <Box display={'flex'} gap={1}>
         {filteredType.icon}

@@ -20,5 +20,6 @@ export async function getStaticProps() {
     props: {
       priceList
     },
+    revalidate: 10
   };
 }

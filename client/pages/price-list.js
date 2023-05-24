@@ -95,7 +95,8 @@ const PriceList = ({priceList}) => {
         </Box>
       </Container>
       <Grid direction={'column'} container xs={12} minHeight={''} mt={0} width={'100%'} justifyContent={'center'} alignItems={'center'}>
-        {priceList.map((pl) => {
+        {priceList.sort((a, b) => a.pos - b.pos).map((pl) => {
+          console.log(pl.pos)
           return (
             <Grid key={pl.title} width={'100%'}>
               <CardPrice icon={showIcon(pl.title)} title={pl.title} rows={pl.rows} booking={pl.booking} href={`/booking?type=${pl.type}`} withHuman={pl.withHumans}>
@@ -117,5 +118,6 @@ export async function getStaticProps() {
     props: {
       priceList
     },
+    revalidate: 10
   };
 }

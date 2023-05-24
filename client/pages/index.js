@@ -46,7 +46,7 @@ export default function Home() {
         <Container>
           <Grid maxWidth={'sm'} container direction={'column'} justifyContent={'center'} mx={'auto'} alignItems={'center'}>
             <Typography sx={{textShadow:'0px 0px 10px black'}} textAlign={'center'} color={'white'} variant='h1'>Баканское озеро</Typography>
-            <Typography sx={{textShadow:'0px 0px 20px black'}} textAlign={'center'} color={'white'} variant='body1'>Наши великолепные удобства и окружающая природа позволят вам полностью расслабиться и насладиться отдыхом вдали от шума и суеты города. Забудьте о повседневных заботах и наслаждайтесь природными красотами в нашей уютной базе отдыха.</Typography>
+            <Typography sx={{textShadow:'0px 0px 20px black'}} textAlign={'center'} color={'white'} variant='body1'>Наши великолепные удобства и окружающая природа позволят вам полностью расслабиться и насладиться отдыхом вдали от шума и суеты города. Забудьте о повседневных заботах и наслаждайтесь природными красотами на нашей уютной базе отдыха.</Typography>
           </Grid>
         </Container>
       </Box>
@@ -57,11 +57,11 @@ export default function Home() {
           </Grid>
           <Grid item xs={12} md={4} display={'flex'}>
             <Divider orientation='vertical' sx={{display: {xs: 'none', md: 'block'}, mx: 0}} />
-            <CounterCard suffix="+" count={50} title={'Акров земли'} description={'Погрузитесь в окружающую природу и насладиться разнообразными активностями'} />
+            <CounterCard suffix="+" count={3} title={'Гектаров земли'} description={'Погрузитесь в окружающую природу и насладиться разнообразными активностями'} />
           </Grid>
           <Grid item xs={12} md={4} display={'flex'}>
             <Divider orientation='vertical' sx={{display: {xs: 'none', md: 'block'}, mx: 0}} />
-            <CounterCard suffix="+" count={10} title={'Беседок'} description={'Выберите удобное место для отдыха с друзьями и семьей в живописной природной среде'} />
+            <CounterCard suffix="+" count={5} title={'Беседок'} description={'Выберите удобное место для отдыха с друзьями и семьей в живописной природной среде'} />
           </Grid>
         </Grid>
       </Card>

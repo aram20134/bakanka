@@ -5,7 +5,7 @@ export const _document = () => {
   return (
     <Html lang='ru'>
       <Head>
-        <link rel='icon' href='/favicon.png' sizes='any' />
+        <link rel='icon' type='image/png' href='favicon.png?v=2' sizes='any' />
         <script defer src="https://yookassa.ru/checkout-widget/v1/checkout-widget.js"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       </Head>

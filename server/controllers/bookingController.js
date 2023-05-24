@@ -77,7 +77,7 @@ class BookingController {
         method: 'get',
         url: `https://api.yookassa.ru/v3/payments/${id}`,
         headers: { 
-          'Authorization': 'Basic MzE3NjA4OnRlc3RfRFRkWVBJMUxsSUVFa1dFUjhyUVVpZ2JvSDdNczYwR001MGlUTUpzX2ZHUQ=='
+          'Authorization': 'Basic MzE2OTQ5OnRlc3RfRFRkWVBJMUxsSUVFa1dFUjhyUVVpZ2JvSDdNczYwR001MGlUTUpzX2ZHUQ=='
         }
       };
       const {data} = await axios.request(config)
@@ -115,7 +115,7 @@ class BookingController {
         headers: { 
           'Idempotence-Key': key, 
           'Content-Type': 'application/json', 
-          'Authorization': 'Basic MzE3NjA4OnRlc3RfRFRkWVBJMUxsSUVFa1dFUjhyUVVpZ2JvSDdNczYwR001MGlUTUpzX2ZHUQ=='
+          'Authorization': 'Basic MzE2OTQ5OnRlc3RfRFRkWVBJMUxsSUVFa1dFUjhyUVVpZ2JvSDdNczYwR001MGlUTUpzX2ZHUQ=='
         },
         data: body
       };

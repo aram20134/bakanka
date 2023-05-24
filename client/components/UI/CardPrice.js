@@ -41,7 +41,7 @@ const CardPrice = ({icon, title, rows, withHuman = true, description, children, 
                       {rows.map((row) => (
                         <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                           <TableCell component="th" scope="row">
-                            {row.name}
+                            {row.name ? row.name : row.title}
                           </TableCell>
                           {withHuman && <TableCell align="right">{row.human}</TableCell>}
                           <TableCell align="right">{row.price + ' ' + row?.typePrice}</TableCell>

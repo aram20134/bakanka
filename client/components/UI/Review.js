@@ -50,7 +50,7 @@ export const Review = ({review, admin = false, setReviews}) => {
         <Grid item xs={12}>
           <Stack direction={'column'} >
             <Typography variant='subtitle1' color={'text.primary'}>Комментарий</Typography>
-            <Typography variant='body2' color={'text.primary'}>{review.flaws}</Typography>
+            <Typography variant='body2' color={'text.primary'}>{review.comment}</Typography>
           </Stack>
         </Grid>
         {admin && (

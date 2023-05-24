@@ -104,7 +104,13 @@ const BookingSteps = ({priceList}) => {
           fullPrice = numberHours * chosedBooking[0].price
         }
       var checkout
-      addOrder({day: chosedDate, title: {...chosedBooking, title: `${numberHuman} чел. на ${numberHours} ч`}, type: type.key, name, phoneNumber: phone, totalPrice: fullPrice}).then((order) => {
+      var title
+      if (type.key === 'kiosk') {
+        title = chosedBooking
+      } else {
+        title = {...chosedBooking, title: `${numberHuman} чел. на ${numberHours} ч`}
+      }
+      addOrder({day: chosedDate, title, type: type.key, name, phoneNumber: phone, totalPrice: fullPrice}).then((order) => {
         getPriceYandex({value: fullPrice, description: 'Бронирование беседок', metadata: {orderId: order._id}}).then((payment) => {
           checkout = new window.YooMoneyCheckoutWidget({
             confirmation_token: payment.confirmation.confirmation_token, //Токен, который перед проведением оплаты нужно получить от ЮKassa
@@ -374,7 +380,7 @@ const BookingSteps = ({priceList}) => {
 
     switch (i) {
       case 0:
-        return type === 'kiosk' ? (
+        return type.key === 'kiosk' ? (
           <>
             <Button disabled sx={{fontSize:'1rem'}} onClick={goBack}>Назад</Button>
             <Button disabled={(name.length > 1 && phone.length > 10 && chosedDate) ? false : true} sx={{fontSize:'1rem'}} onClick={goNext}>Вперед</Button>
@@ -386,7 +392,7 @@ const BookingSteps = ({priceList}) => {
           </>
         )
       case 1:
-        return type === 'kiosk' ? (
+        return type.key === 'kiosk' ? (
           <>
             <Button sx={{fontSize:'1rem'}} onClick={goBack}>Назад</Button>
             <Button onClick={goNext} disabled={!chosedBooking.length && true} sx={{fontSize:'1rem'}}>Вперед</Button>
